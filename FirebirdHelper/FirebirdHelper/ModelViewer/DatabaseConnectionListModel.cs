@@ -9,20 +9,43 @@ using System.Windows;
 using FirebirdHelper.Models;
 using System.Collections.ObjectModel;
 using System.Xml.Linq;
+using System.IO;
 
 namespace FirebirdHelper.ModelViewer
 {
 	public class DatabaseConnectionListModel: ModelBase
 	{
+
 		public DatabaseConnectionListModel()
 		{
+			Directory.CreateDirectory("Resources");
+			ConnectionList = new ObservableCollection<ConnectionModel>();
             var connections = XDocument.Load(@"Resources/Connection.xml");
             IList<XElement> connectionLists = null;
-            if (connections.Element("Connections") != null)
-                
+			if (connections.Element("Connections") != null)
+				connectionLists = connections.Element("Connections").Elements().ToList();
+			foreach (var connect in connectionLists)
+				ConnectionList.Add(new ConnectionModel()
+					{
+						Alias = connect.Name.LocalName,
+						DatabasePath = connect.Attribute("Path").Value,
+						Password = connect.Attribute("Pass").Value,
+						Login = connect.Attribute("Login").Value,
+					});
 		}
-        ObservableCollection<ConnectionModel> ConnectionList { get; set; }
-        public static FbConnection Connection { get; set; }
+
+		IList<ConnectionModel> _connectionList;
+		public IList<ConnectionModel> ConnectionList
+		{
+			get { return _connectionList; }
+			set
+			{
+				_connectionList = value;
+				FirePropertyChanged("ConnectionList");
+			}
+		}
+        
+		public static FbConnection Connection { get; set; }
 
 		public ICommand AddDatabase
 		{
@@ -60,18 +83,53 @@ namespace FirebirdHelper.ModelViewer
         {
             get
             {
-                return new UserCommand(() =>
+                return new UserCommand((s) =>
                 {
                     try
                     {
                         if (LoginModel.ConnectionString != null)
                             Connection = new FbConnection(LoginModel.ConnectionString);
+						IsConnect = true;
+						IsSelect = false;
                     }
                     catch (Exception ex) { MessageBox.Show(ex.ToString()); }
 
                 });
             }
         }
+
+		bool _isSelect = false;
+		public bool IsSelect
+		{
+			get { return _isSelect; }
+			set 
+			{
+				_isSelect = value;
+				FirePropertyChanged("IsSelect");
+			}
+		}
+
+		bool _isConnect = false;
+		public bool IsConnect
+		{
+			get { return _isConnect; }
+			set
+			{
+				_isConnect = value;
+				FirePropertyChanged("IsConnect");
+			}
+		}
+
+		public ICommand Select
+		{
+			get
+			{
+				return new UserCommand(() =>
+				{
+					IsSelect = true;
+				});
+			}
+		}
 
 	}
 }

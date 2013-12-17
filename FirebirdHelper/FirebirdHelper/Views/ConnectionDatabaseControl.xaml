@@ -4,28 +4,48 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 			 xmlns:models="clr-namespace:FirebirdHelper.ModelViewer"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 	<UserControl.Resources>
 		<models:DatabaseConnectionListModel x:Key="Context"/>
 	</UserControl.Resources>
-	<Grid DataContext="{StaticResource Context}">
+	<Grid DataContext="{StaticResource Context}" x:Name="Main">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<StackPanel Orientation="Horizontal" Grid.Row="0" >
-			<Button Command="{Binding AddDatabase}">
+			<Button Command="{Binding AddDatabase}" ToolTip="Зарегистрировать БД">
 					<Image Source="/Resources/database_add.png" />
 			</Button>
-            <Button Command="{Binding RemoveDatabase}">
+			<Button Command="{Binding RemoveDatabase}" ToolTip="Удалить подключение">
                 <Image Source="/Resources/database_delete.png" />
             </Button>
-            <Button Content="Подключиться"  Command="{Binding Connect}"/>
-            <Button Content="Отключиться"/>
-            <!--<Button Command="{Binding AddDatabase}">
+			<Button Command="{Binding Connect}" ToolTip="Подключиться" IsEnabled="{Binding IsSelect}">
+				<Image Source="/Resources/database_connect.png"/>
+			</Button>
+			<Button ToolTip="Разорвать соединение" IsEnabled="{Binding IsConnect}">
+				<Image Source="/Resources/database_close.png" Width="32"/>
+			</Button>
+				<!--<Button Command="{Binding AddDatabase}">
                 <Image Source="/Resources/database_gear.png" />
             </Button>-->
         </StackPanel>
+		<ListBox ItemsSource="{Binding ConnectionList}" Grid.Row="1" x:Name="ConnectionList">
+			<i:Interaction.Triggers>
+				<i:EventTrigger EventName="SelectionChanged">
+					<i:InvokeCommandAction Command="{Binding Select}"/>
+				</i:EventTrigger>
+				<i:EventTrigger EventName="MouseDoubleClick">
+					<i:InvokeCommandAction Command="{Binding Connect}" CommandParameter="{Binding SelectedItem,ElementName=ConnectionList}"/>
+				</i:EventTrigger>
+			</i:Interaction.Triggers>
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<Label Content="{Binding Alias, UpdateSourceTrigger=PropertyChanged}" />
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
 	</Grid>
 </UserControl>

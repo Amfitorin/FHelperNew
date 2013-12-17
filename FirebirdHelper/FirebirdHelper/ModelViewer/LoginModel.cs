@@ -9,6 +9,7 @@ using Microsoft.Win32;
 using File = System.IO;
 using FirebirdHelper.Models;
 using System.Xml.Linq;
+using Io = System.IO;
 
 namespace FirebirdHelper.ModelViewer
 {
@@ -22,21 +23,33 @@ namespace FirebirdHelper.ModelViewer
 
 		public ICommand Connect
 		{
-			get 
+			get
 			{
-				return new UserCommand((o)=>
+				return new UserCommand((o) =>
 				{
 					var builder = new FbConnectionStringBuilder();
 					builder.Database = DatabasePath;
 					builder.UserID = Login;
 					builder.Password = Password;
 					ConnectionString = builder.ToString();
-                    var document = XDocument.Load(@"Resources/Connect.xml");
-                    if (document == null)
-                        document = new XDocument();
+					var document = XDocument.Load(@"Resources/Connection.xml");
+					var connections = document.Element("Connections");
+					if (connections.Element(Alias) != null)
+						connections.Element(Alias).Remove();
+					connections.Add(UpdateConnection());
+					Io.File.Delete(ConnectionsFile);
+					document.Save(ConnectionsFile);
 				});
 			}
 		}
+
+		XElement UpdateConnection()
+		{
+			var connection = new XElement(Alias, null, new XAttribute("Login", Login), new XAttribute("Pass", Password), new XAttribute("Path", DatabasePath));
+			return connection;
+		}
+
+
 
 		public ICommand View
 		{
@@ -55,5 +68,5 @@ namespace FirebirdHelper.ModelViewer
 			}
 		}
 
-    }
+	}
 }

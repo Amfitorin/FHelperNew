@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FirebirdHelper.Models
 {
-    public abstract class ConnectionModel : ModelBase
+    public class ConnectionModel : ModelBase
     {
         string _databasePath;
         public string DatabasePath
@@ -42,5 +42,18 @@ namespace FirebirdHelper.Models
                 FirePropertyChanged("IsConnect");
             }
         }
+
+		string _alias;
+		public string Alias
+		{
+			get { return _alias; }
+			set
+			{
+				_alias = value;
+				FirePropertyChanged("Alias");
+				FirePropertyChanged("IsConnect");
+			}
+		}
+
     }
 }

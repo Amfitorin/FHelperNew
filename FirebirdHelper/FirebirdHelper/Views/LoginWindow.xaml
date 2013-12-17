@@ -21,6 +21,8 @@
 			<Button Content="View" Command="{Binding View}" />
 		</StackPanel>
 		<StackPanel Grid.Row="2" Orientation="Vertical">
+			<Label Content="Alias" />
+			<TextBox Width="200" Text="{Binding Alias,UpdateSourceTrigger=PropertyChanged}" helper:WaterMarkExtentions.WaterMark="Enter the database alias" Style="{StaticResource WaterMarkTextboxStyle}"    />
 			<Label Content="Login" />
 			<TextBox Width="200" Text="{Binding Login,UpdateSourceTrigger=PropertyChanged}" helper:WaterMarkExtentions.WaterMark="Enter your Login" Style="{StaticResource WaterMarkTextboxStyle}"    />
 			<Label Content="Password" />

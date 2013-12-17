@@ -136,7 +136,15 @@
     <Resource Include="Resources\database_gear.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Connect.xml" />
+    <Resource Include="Resources\add.png" />
+    <Resource Include="Resources\check_mark.png" />
+    <Resource Include="Resources\database_close.png" />
+    <Resource Include="Resources\database_connect.png" />
+    <Resource Include="Resources\delete.png" />
+    <Resource Include="Resources\edit.png" />
+    <Resource Include="Resources\key.png" />
+    <Resource Include="Resources\key_2.png" />
+    <Resource Include="Resources\remove.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
