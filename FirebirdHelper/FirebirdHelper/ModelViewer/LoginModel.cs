@@ -17,8 +17,6 @@ namespace FirebirdHelper.ModelViewer
 	{
 		readonly string[] _extensions = new string[] { ".fdb", ".gdb", ".FDB", ".GDB" };
 
-		public static string ConnectionString { get; set; }
-
 		public bool IsConnect { get { return Password != null && Login != null && _extensions.Contains(File.Path.GetExtension(DatabasePath)); } }
 
 		public ICommand Connect
@@ -27,11 +25,6 @@ namespace FirebirdHelper.ModelViewer
 			{
 				return new UserCommand((o) =>
 				{
-					var builder = new FbConnectionStringBuilder();
-					builder.Database = DatabasePath;
-					builder.UserID = Login;
-					builder.Password = Password;
-					ConnectionString = builder.ToString();
 					var document = XDocument.Load(@"Resources/Connection.xml");
 					var connections = document.Element("Connections");
 					if (connections.Element(Alias) != null)

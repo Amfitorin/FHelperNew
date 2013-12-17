@@ -22,10 +22,10 @@
 			<Button Command="{Binding RemoveDatabase}" ToolTip="Удалить подключение">
                 <Image Source="/Resources/database_delete.png" />
             </Button>
-			<Button Command="{Binding Connect}" ToolTip="Подключиться" IsEnabled="{Binding IsSelect}">
+			<Button Command="{Binding Connect}" ToolTip="Подключиться" IsEnabled="{Binding IsSelect}" CommandParameter="{Binding SelectedItem, ElementName=ConnectionList}">
 				<Image Source="/Resources/database_connect.png"/>
 			</Button>
-			<Button ToolTip="Разорвать соединение" IsEnabled="{Binding IsConnect}">
+			<Button ToolTip="Разорвать соединение" IsEnabled="{Binding IsConnect}" Command="{Binding Disconnect}">
 				<Image Source="/Resources/database_close.png" Width="32"/>
 			</Button>
 				<!--<Button Command="{Binding AddDatabase}">

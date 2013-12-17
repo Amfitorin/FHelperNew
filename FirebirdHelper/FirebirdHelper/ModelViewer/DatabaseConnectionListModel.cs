@@ -13,15 +13,15 @@ using System.IO;
 
 namespace FirebirdHelper.ModelViewer
 {
-	public class DatabaseConnectionListModel: ModelBase
+	public class DatabaseConnectionListModel : ModelBase
 	{
 
 		public DatabaseConnectionListModel()
 		{
 			Directory.CreateDirectory("Resources");
 			ConnectionList = new ObservableCollection<ConnectionModel>();
-            var connections = XDocument.Load(@"Resources/Connection.xml");
-            IList<XElement> connectionLists = null;
+			var connections = XDocument.Load(@"Resources/Connection.xml");
+			IList<XElement> connectionLists = null;
 			if (connections.Element("Connections") != null)
 				connectionLists = connections.Element("Connections").Elements().ToList();
 			foreach (var connect in connectionLists)
@@ -44,12 +44,12 @@ namespace FirebirdHelper.ModelViewer
 				FirePropertyChanged("ConnectionList");
 			}
 		}
-        
+
 		public static FbConnection Connection { get; set; }
 
 		public ICommand AddDatabase
 		{
-			get 
+			get
 			{
 				return new UserCommand(() =>
 					{
@@ -58,51 +58,67 @@ namespace FirebirdHelper.ModelViewer
 					});
 			}
 		}
-        public ICommand RemoveDatabase
-        {
-            get
-            {
-                return new UserCommand(() =>
-                {
-                    
-                });
-            }
-        }
-        public ICommand ConfigDatabase
-        {
-            get
-            {
-                return new UserCommand(() =>
-                {
-                    
-                });
-            }
-        }
+		public ICommand RemoveDatabase
+		{
+			get
+			{
+				return new UserCommand(() =>
+				{
 
-        public ICommand Connect
-        {
-            get
-            {
-                return new UserCommand((s) =>
-                {
-                    try
-                    {
-                        if (LoginModel.ConnectionString != null)
-                            Connection = new FbConnection(LoginModel.ConnectionString);
+				});
+			}
+		}
+		public ICommand ConfigDatabase
+		{
+			get
+			{
+				return new UserCommand(() =>
+				{
+
+				});
+			}
+		}
+
+		public ICommand Connect
+		{
+			get
+			{
+				return new UserCommand((s) =>
+				{
+					try
+					{
+						dynamic connect = s;
+						var builder = new FbConnectionStringBuilder();
+						builder.Database = connect.DatabasePath;
+						builder.UserID = connect.Login;
+						builder.Password = connect.Password;
+						Connection = new FbConnection(builder.ToString());
 						IsConnect = true;
 						IsSelect = false;
-                    }
-                    catch (Exception ex) { MessageBox.Show(ex.ToString()); }
+					}
+					catch (Exception ex) { MessageBox.Show(ex.ToString()); }
 
-                });
-            }
-        }
+				});
+			}
+		}
 
+		public ICommand Disconnect
+		{
+			get
+			{
+				return new UserCommand((s) =>
+				{
+					IsConnect = false;
+					IsSelect = true;
+					Connection.Dispose();
+				});
+			}
+		}
 		bool _isSelect = false;
 		public bool IsSelect
 		{
 			get { return _isSelect; }
-			set 
+			set
 			{
 				_isSelect = value;
 				FirePropertyChanged("IsSelect");
