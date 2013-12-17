@@ -1,0 +1,52 @@
+﻿<Application x:Class="FirebirdHelper.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+		<Style TargetType="TextBox" x:Key="WaterMarkTextboxStyle">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="TextBox">
+						<Border Background="{TemplateBinding Background}" 
+                       BorderBrush="{TemplateBinding BorderBrush}"
+                       BorderThickness="{TemplateBinding BorderThickness}" >
+							<Grid>
+								<ScrollViewer x:Name="PART_ContentHost" />
+								<TextBlock x:Name="WatermarkText"
+                          Text="{Binding WaterMark, 
+                              RelativeSource={RelativeSource TemplatedParent}}"
+                          Foreground="Gray" Margin="5,0,0,0" 
+                          HorizontalAlignment="Left" 
+                          VerticalAlignment="Center" 
+                          Visibility="Collapsed" 
+                          IsHitTestVisible="False"/>
+							</Grid>
+						</Border>
+						<ControlTemplate.Triggers>
+							<MultiTrigger>
+								<MultiTrigger.Conditions>
+									<Condition Property="IsKeyboardFocusWithin" 
+                                   Value="False"/>
+									<Condition Property="Text" Value=""/>
+								</MultiTrigger.Conditions>
+								<Setter Property="Visibility" 
+                           TargetName="WatermarkText" 
+                           Value="Visible"/>
+							</MultiTrigger>
+							<MultiTrigger>
+								<MultiTrigger.Conditions>
+									<Condition Property="IsKeyboardFocusWithin" 
+                                   Value="False"/>
+									<Condition Property="Text" Value="{x:Null}"/>
+								</MultiTrigger.Conditions>
+								<Setter Property="Visibility"
+                           TargetName="WatermarkText" 
+                           Value="Visible"/>
+							</MultiTrigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+	</Application.Resources>
+</Application>
