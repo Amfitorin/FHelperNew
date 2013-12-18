@@ -19,12 +19,14 @@ namespace FirebirdHelper.ModelViewer
 		public DatabaseConnectionListModel()
 		{
 			Directory.CreateDirectory("Resources");
-			ConnectionList = new ObservableCollection<ConnectionModel>();
+			Connections = new Dictionary<string, Lookup<string, string>>();
+			ConnectionList = new List<ConnectionModel>();
 			var connections = XDocument.Load(@"Resources/Connection.xml");
 			IList<XElement> connectionLists = null;
 			if (connections.Element("Connections") != null)
 				connectionLists = connections.Element("Connections").Elements().ToList();
 			foreach (var connect in connectionLists)
+			{
 				ConnectionList.Add(new ConnectionModel()
 					{
 						Alias = connect.Name.LocalName,
@@ -32,6 +34,9 @@ namespace FirebirdHelper.ModelViewer
 						Password = connect.Attribute("Pass").Value,
 						Login = connect.Attribute("Login").Value,
 					});
+				Connections[connect.Name.LocalName] = null;
+			}
+
 		}
 
 		IList<ConnectionModel> _connectionList;
@@ -45,6 +50,17 @@ namespace FirebirdHelper.ModelViewer
 			}
 		}
 
+		Dictionary<string,Lookup<string,string>> _connections;
+		public Dictionary<string, Lookup<string, string>> Connections
+		{
+			get { return _connections; }
+			set
+			{
+				_connections = value;
+				FirePropertyChanged("Connections");
+			}
+		}
+
 		public static FbConnection Connection { get; set; }
 
 		public ICommand AddDatabase
@@ -54,7 +70,20 @@ namespace FirebirdHelper.ModelViewer
 				return new UserCommand(() =>
 					{
 						var window = new LoginWindow();
-						window.Show();
+						window.ShowDialog();
+						var document = XDocument.Load(ConnectionsFile);
+						if (document.Element("Connections").Elements().Count() != 0)
+						{
+							ConnectionList = new List<ConnectionModel>();
+							foreach (var item in document.Element("Connections").Elements())
+								ConnectionList.Add(new ConnectionModel
+								{
+									Alias = item.Name.LocalName,
+									DatabasePath = item.Attribute("Path").Value,
+									Password = item.Attribute("Pass").Value,
+									Login = item.Attribute("Login").Value
+								});
+						}
 					});
 			}
 		}
@@ -62,12 +91,27 @@ namespace FirebirdHelper.ModelViewer
 		{
 			get
 			{
-				return new UserCommand(() =>
+				return new UserCommand((s) =>
 				{
-
+					ConnectionList.Remove(SelectedConnection);
+					Connections.Remove(SelectedConnection.Alias);
+					SelectedConnection = null;
+					IsSelect = false;
+					UpdateConnectionFile();
 				});
 			}
 		}
+		void UpdateConnectionFile()
+		{
+			var document = new XDocument();
+			var connections = new XElement("Connections");
+			foreach (var item in ConnectionList)
+				connections.Add(new XElement(item.Alias, null, new XAttribute("Login", item.Login), new XAttribute("Pass", item.Password), new XAttribute("Path", item.DatabasePath)));
+			document.Add(connections);
+			File.Delete(ConnectionsFile);
+			document.Save(ConnectionsFile);
+		}
+
 		public ICommand ConfigDatabase
 		{
 			get
@@ -87,11 +131,10 @@ namespace FirebirdHelper.ModelViewer
 				{
 					try
 					{
-						dynamic connect = s;
 						var builder = new FbConnectionStringBuilder();
-						builder.Database = connect.DatabasePath;
-						builder.UserID = connect.Login;
-						builder.Password = connect.Password;
+						builder.Database = SelectedConnection.DatabasePath;
+						builder.UserID = SelectedConnection.Login;
+						builder.Password = SelectedConnection.Password;
 						Connection = new FbConnection(builder.ToString());
 						IsConnect = true;
 						IsSelect = false;
@@ -109,7 +152,7 @@ namespace FirebirdHelper.ModelViewer
 				return new UserCommand((s) =>
 				{
 					IsConnect = false;
-					IsSelect = true;
+					IsSelect = false;
 					Connection.Dispose();
 				});
 			}
@@ -122,6 +165,7 @@ namespace FirebirdHelper.ModelViewer
 			{
 				_isSelect = value;
 				FirePropertyChanged("IsSelect");
+				FirePropertyChanged("IsRemove");
 			}
 		}
 
@@ -133,19 +177,31 @@ namespace FirebirdHelper.ModelViewer
 			{
 				_isConnect = value;
 				FirePropertyChanged("IsConnect");
+				FirePropertyChanged("IsRemove");
 			}
 		}
+
+		public bool IsRemove
+		{
+			get { return IsSelect && !IsConnect; }
+		}
+
+		ConnectionModel SelectedConnection;
+
 
 		public ICommand Select
 		{
 			get
 			{
-				return new UserCommand(() =>
+				return new UserCommand((s) =>
 				{
+					dynamic item = s;
+					SelectedConnection = ConnectionList.First(con=>con.Alias == item.Key);
 					IsSelect = true;
 				});
 			}
 		}
+
 
 	}
 }

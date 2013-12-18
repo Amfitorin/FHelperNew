@@ -19,20 +19,46 @@
 			<Button Command="{Binding AddDatabase}" ToolTip="Зарегистрировать БД">
 					<Image Source="/Resources/database_add.png" />
 			</Button>
-			<Button Command="{Binding RemoveDatabase}" ToolTip="Удалить подключение">
+			<Button Command="{Binding RemoveDatabase}" ToolTip="Удалить подключение" IsEnabled="{Binding IsRemove}">
                 <Image Source="/Resources/database_delete.png" />
             </Button>
-			<Button Command="{Binding Connect}" ToolTip="Подключиться" IsEnabled="{Binding IsSelect}" CommandParameter="{Binding SelectedItem, ElementName=ConnectionList}">
+			<Button Command="{Binding Connect}" ToolTip="Подключиться" IsEnabled="{Binding IsSelect}" CommandParameter="{Binding SelectedItem, ElementName=ConnectionsList}">
 				<Image Source="/Resources/database_connect.png"/>
 			</Button>
-			<Button ToolTip="Разорвать соединение" IsEnabled="{Binding IsConnect}" Command="{Binding Disconnect}">
+			<Button ToolTip="Разорвать соединение" IsEnabled="{Binding IsConnect}" Command="{Binding Disconnect}" CommandParameter="{Binding SelectedItem,ElementName=ConnectionsList}">
 				<Image Source="/Resources/database_close.png" Width="32"/>
 			</Button>
 				<!--<Button Command="{Binding AddDatabase}">
                 <Image Source="/Resources/database_gear.png" />
             </Button>-->
         </StackPanel>
-		<ListBox ItemsSource="{Binding ConnectionList}" Grid.Row="1" x:Name="ConnectionList">
+		<TreeView Grid.Row="1" x:Name="ConnectionsList" ItemsSource="{Binding Connections}" >
+			<i:Interaction.Triggers>
+				<i:EventTrigger EventName="Mouse">
+					<i:InvokeCommandAction Command="{Binding Select, Source={StaticResource Context}}" CommandParameter="{Binding}"  />
+				</i:EventTrigger>
+			</i:Interaction.Triggers>
+			<TreeView.ItemTemplate>
+				<DataTemplate>
+					<TreeViewItem x:Name="Item" Header="{Binding Key}" ItemsSource="{Binding Values}">
+						<i:Interaction.Triggers>
+							<i:EventTrigger EventName="MouseUp">
+								<i:InvokeCommandAction Command="{Binding Select, Source={StaticResource Context}}" CommandParameter="{Binding}"  />
+							</i:EventTrigger>
+							<i:EventTrigger EventName="MouseDoubleClick">
+								<i:InvokeCommandAction Command="{Binding Connect, Source={StaticResource Context}}" CommandParameter="{Binding SelectedItem,ElementName=ConnectionsList}"/>
+							</i:EventTrigger>
+						</i:Interaction.Triggers>
+						<TreeViewItem.ItemTemplate>
+							<DataTemplate>
+								<TreeViewItem x:Name="Item" Header="{Binding Key}" ItemsSource="{Binding Values}"/>
+							</DataTemplate>
+						</TreeViewItem.ItemTemplate>
+					</TreeViewItem>
+						</DataTemplate>
+					</TreeView.ItemTemplate>
+		</TreeView>
+		<!--<ListBox ItemsSource="{Binding ConnectionList}" Grid.Row="1" x:Name="ConnectionList">
 			<i:Interaction.Triggers>
 				<i:EventTrigger EventName="SelectionChanged">
 					<i:InvokeCommandAction Command="{Binding Select}"/>
@@ -46,6 +72,6 @@
 					<Label Content="{Binding Alias, UpdateSourceTrigger=PropertyChanged}" />
 				</DataTemplate>
 			</ListBox.ItemTemplate>
-		</ListBox>
+		</ListBox>-->
 	</Grid>
 </UserControl>
